@@ -2,7 +2,7 @@ import os
 import math
 import logging
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import joblib
@@ -19,7 +19,7 @@ else:
 app = FastAPI(
     title="Iris Botanical Classifier",
     description="SVM Machine Learning Laboratory & Interactive Neural Dashboard",
-    version="3.1.0",
+    version="3.3.0",
 )
 
 app.add_middleware(
@@ -30,13 +30,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# THÊM API ĐỂ TRẢ VỀ ẢNH TỪ THƯ MỤC GỐC MỘT CÁCH AN TOÀN
+@app.get("/img/{img_name}")
+def get_image(img_name: str):
+    allowed_images = ["anh_setosa.jpg", "anh_versicolor.jpg", "anh_virginica.jpg"]
+    if img_name in allowed_images and os.path.exists(img_name):
+        return FileResponse(img_name)
+    raise HTTPException(status_code=404, detail="Không tìm thấy ảnh")
+
 class IrisInput(BaseModel):
     sepal_length: float
     sepal_width: float
     petal_length: float
     petal_width: float
 
-# 2. Cập nhật Metadata với Ảnh thật của các loài hoa
+# 2. Cập nhật Metadata với đường dẫn qua API mới
 SPECIES_METADATA = {
     0: {
         "name": "Iris Setosa",
@@ -47,7 +55,7 @@ SPECIES_METADATA = {
         "badge": "bg-emerald-500/10 text-emerald-300 border-emerald-500/30",
         "desc": "Đặc trưng bởi đài hoa rộng nhưng cánh hoa tiêu biến cực nhỏ. Loài hoa này có khả năng phân tách tuyến tính tuyệt đối.",
         "ecology": "Bắc bán cầu, khí hậu ôn đới lạnh, vùng đầm lầy ven biển.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Kosaciec_szczecinkowaty_Iris_setosa.jpg/320px-Kosaciec_szczecinkowaty_Iris_setosa.jpg"
+        "image": "/img/anh_setosa.jpg"  # Gọi qua API /img/
     },
     1: {
         "name": "Iris Versicolor",
@@ -58,7 +66,7 @@ SPECIES_METADATA = {
         "badge": "bg-cyan-500/10 text-cyan-300 border-cyan-500/30",
         "desc": "Mang hình thái trung gian, có sự cân bằng lý tưởng giữa tỷ lệ chiều dài cánh hoa và đài hoa.",
         "ecology": "Khu vực ẩm ướt Bắc Mỹ, ven hồ và đồng cỏ ngập nước ngọt.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Iris_versicolor_3.jpg/320px-Iris_versicolor_3.jpg"
+        "image": "/img/anh_versicolor.jpg" # Gọi qua API /img/
     },
     2: {
         "name": "Iris Virginica",
@@ -69,7 +77,7 @@ SPECIES_METADATA = {
         "badge": "bg-purple-500/10 text-purple-300 border-purple-500/30",
         "desc": "Loài hoa có kích thước lớn và cấu trúc tráng lệ nhất với cánh hoa thuôn dài, sắc tím đậm đặc trưng.",
         "ecology": "Đồng cỏ ẩm ven biển và đầm lầy phía Đông Bắc Mỹ.",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Iris_virginica.jpg/320px-Iris_virginica.jpg"
+        "image": "/img/anh_virginica.jpg" # Gọi qua API /img/
     },
 }
 
@@ -91,7 +99,6 @@ def predict(data: IrisInput):
     feat = [data.sepal_length, data.sepal_width, data.petal_length, data.petal_width]
     pred = int(model.predict([feat])[0])
     
-    # Tính Confidence Softmax
     dists = [math.sqrt(sum((feat[i] - CENTROIDS[c][i]) ** 2 for i in range(4))) for c in range(3)]
     inv_dists = [1.0 / (d + 1e-5) for d in dists]
     inv_dists[pred] *= 1.8
@@ -156,7 +163,7 @@ def dashboard():
         <style>
             body { background-color: #020617; }
             .glass-panel {
-                background: rgba(15, 23, 42, 0.75); /* Tối hơn chút để dễ đọc trên nền cảnh vật */
+                background: rgba(15, 23, 42, 0.75);
                 backdrop-filter: blur(24px);
                 -webkit-backdrop-filter: blur(24px);
                 border: 1px solid rgba(255, 255, 255, 0.1);
@@ -175,19 +182,14 @@ def dashboard():
     </head>
     <body class="min-h-screen text-slate-100 flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative">
 
-        <!-- ANIMATED NATURE BACKGROUND -->
         <div class="fixed inset-0 z-[-1] overflow-hidden bg-slate-900">
-            <!-- Ảnh cảnh vật thiên nhiên (Unsplash) + Hiệu ứng Ken Burns -->
             <div class="absolute inset-0 bg-cover bg-center bg-no-repeat animate-kenburns opacity-70" 
                  style="background-image: url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2070&auto=format&fit=crop');">
             </div>
-            <!-- Lớp sương mù nhân tạo động -->
             <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent animate-floatingfog"></div>
-            <!-- Lớp phủ bảo vệ màu sắc -->
             <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]"></div>
         </div>
 
-        <!-- Top Navigation Bar -->
         <nav class="glass-panel sticky top-0 z-50 border-b border-white/10 px-6 py-4">
             <div class="max-w-7xl mx-auto flex items-center justify-between">
                 <div class="flex items-center gap-4">
@@ -214,10 +216,8 @@ def dashboard():
             </div>
         </nav>
 
-        <!-- Main Dashboard Container -->
         <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full relative z-10">
             
-            <!-- LEFT PANEL: Morphological Controls -->
             <div class="lg:col-span-5 flex flex-col gap-6">
                 <div class="glass-panel rounded-3xl p-6 sm:p-7 shadow-2xl relative overflow-hidden">
                     <div class="flex items-center justify-between mb-4">
@@ -231,14 +231,12 @@ def dashboard():
                         </button>
                     </div>
 
-                    <!-- Presets -->
                     <div class="grid grid-cols-3 gap-2 p-1 bg-black/40 rounded-2xl border border-white/10 mb-6">
                         <button onclick="applyPreset(5.0, 3.4, 1.5, 0.2)" class="py-2 px-1 text-center rounded-xl text-xs font-medium hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-400 transition">Mẫu Setosa</button>
                         <button onclick="applyPreset(6.0, 2.8, 4.3, 1.3)" class="py-2 px-1 text-center rounded-xl text-xs font-medium hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-400 transition">Mẫu Versicolor</button>
                         <button onclick="applyPreset(6.6, 3.0, 5.6, 2.1)" class="py-2 px-1 text-center rounded-xl text-xs font-medium hover:bg-purple-500/20 text-slate-300 hover:text-purple-400 transition">Mẫu Virginica</button>
                     </div>
 
-                    <!-- Sliders -->
                     <div class="space-y-5">
                         <div class="space-y-2">
                             <div class="flex justify-between items-center text-xs">
@@ -277,18 +275,15 @@ def dashboard():
                 </div>
             </div>
 
-            <!-- RIGHT PANEL: Visualization -->
             <div class="lg:col-span-7 flex flex-col gap-6 relative">
                 
-                <!-- Card kết quả chính -->
                 <div id="specimen-card" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden transition-all duration-500 border border-white/10 shadow-2xl">
                     <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full blur-3xl opacity-25 pointer-events-none transition-colors duration-1000" id="ambient-glow" style="background: #10b981;"></div>
                     
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 pb-6 border-b border-white/10">
                         <div class="flex items-center gap-5">
-                            <!-- Ảnh thật của hoa -->
                             <div class="relative shrink-0">
-                                <img id="specimen-img" src="" alt="Iris Image" class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-2xl shadow-xl border-2 border-white/20 transition-all duration-500 bg-black/50">
+                                <img id="specimen-img" src="" alt="Iris Image" class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-2xl shadow-xl border-2 border-white/20 transition-all duration-500 bg-black/50" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdib3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzMzMyIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZmlsbD0iI2ZmZiIgZm9udC1zaXplPSIxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='">
                                 <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10 pointer-events-none"></div>
                             </div>
                             
@@ -467,19 +462,19 @@ def dashboard():
                     const data = await res.json();
                     const spec = data.species;
                     
-                    // Cập nhật giao diện thẻ kết quả
                     document.getElementById('specimen-title').textContent = spec.name;
                     document.getElementById('specimen-author').textContent = `Taxonomy: ${spec.author}`;
                     document.getElementById('specimen-desc').textContent = spec.desc;
                     document.getElementById('specimen-eco').textContent = spec.ecology;
                     document.getElementById('main-conf').textContent = `${data.confidences[data.prediction]}%`;
                     
-                    // Load ảnh thật (Có hiệu ứng mờ nhạt dần khi đổi ảnh để mượt hơn)
                     const imgEl = document.getElementById('specimen-img');
-                    if (imgEl.src !== spec.image) {
+                    
+                    const currentImgPath = new URL(imgEl.src, window.location.origin).pathname;
+                    if (currentImgPath !== spec.image) {
                         imgEl.style.opacity = 0;
                         setTimeout(() => {
-                            imgEl.src = spec.image;
+                            imgEl.src = spec.image + "?t=" + new Date().getTime();
                             imgEl.style.opacity = 1;
                         }, 200);
                     }
@@ -490,7 +485,6 @@ def dashboard():
 
                     document.getElementById('ambient-glow').style.background = spec.accent;
 
-                    // Cập nhật thanh %
                     document.getElementById('bar-0').style.width = `${data.confidences.setosa}%`;
                     document.getElementById('bar-val-0').textContent = `${data.confidences.setosa}%`;
                     document.getElementById('bar-1').style.width = `${data.confidences.versicolor}%`;
@@ -498,13 +492,11 @@ def dashboard():
                     document.getElementById('bar-2').style.width = `${data.confidences.virginica}%`;
                     document.getElementById('bar-val-2').textContent = `${data.confidences.virginica}%`;
 
-                    // Cập nhật biểu đồ Radar
                     if (radarChart) {
                         radarChart.data.datasets[0].data = data.features;
                         radarChart.data.datasets[0].borderColor = spec.accent;
                         radarChart.data.datasets[0].pointBackgroundColor = spec.accent;
                         
-                        // Chuyển màu nền radar theo loài hoa (opacity 25%)
                         const rgb = spec.accent.match(/\w\w/g).map(x => parseInt(x, 16));
                         radarChart.data.datasets[0].backgroundColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.25)`;
                         radarChart.update();
@@ -526,6 +518,4 @@ def dashboard():
     </body>
     </html>
     """
-
-
 
