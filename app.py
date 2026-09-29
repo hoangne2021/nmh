@@ -13,7 +13,6 @@ import joblib
 # ==========================================
 DB_PATH = "history.db"
 
-
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     conn.execute('''CREATE TABLE IF NOT EXISTS history
@@ -22,7 +21,6 @@ def init_db():
                   species TEXT, confidence REAL)''')
     conn.commit()
     conn.close()
-
 
 init_db()
 
@@ -63,7 +61,7 @@ try:
 except ImportError:
     pass
 
-app = FastAPI(title="Iris AI Classifier Pro", version="8.0.0")
+app = FastAPI(title="Iris AI Classifier Pro", version="8.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 # ==========================================
@@ -74,7 +72,6 @@ class IrisInput(BaseModel):
     sepal_width: float
     petal_length: float
     petal_width: float
-
 
 SPECIES_METADATA = {
     0: {"name": "Iris Setosa", "tag": "Setosa", "color": "#ea580c"},
@@ -168,7 +165,7 @@ def clear_history():
 
 
 # ==========================================
-# 4. KHUNG GIAO DIỆN (plain string, KHÔNG dùng f-string -> không cần escape {{ }})
+# 4. KHUNG GIAO DIỆN CƠ BẢN (BASE_HTML)
 # ==========================================
 BASE_HTML = """<!DOCTYPE html>
 <html lang="vi">
@@ -182,12 +179,12 @@ BASE_HTML = """<!DOCTYPE html>
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 <script>
   tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans','sans-serif'], mono: ['JetBrains Mono','monospace'] } } } };
-  // Khởi tạo theme sớm để tránh nháy trắng
+  // Khởi tạo theme sớm
   (function(){ const t = localStorage.getItem('theme');
     if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark'); })();
 </script>
 <style>
-  /* ===== Biến màu nhất quán cho Sáng / Tối ===== */
+  /* ===== Biến màu ===== */
   :root {
     --bg:#f7f5f2; --surface:#ffffff; --surface-2:#f1eee9; --text:#1c1917; --muted:#6b645c;
     --border:#e4dfd8; --accent:#ea580c; --accent-soft:rgba(234,88,12,.10);
@@ -222,7 +219,7 @@ BASE_HTML = """<!DOCTYPE html>
   .nav-link.active::after, .nav-link:hover::after { transform:scaleX(1); }
   .sw-c { color:var(--c-setosa); } .ve-c { color:var(--c-versicolor); } .vi-c { color:var(--c-virginica); }
 
-  /* Chuyển cảnh trang + hiện kết quả */
+  /* Animation */
   @keyframes pageIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
   main { animation:pageIn .45s ease both; }
   body.leaving main { opacity:0; transform:translateY(-6px); transition:opacity .2s, transform .2s; }
@@ -235,12 +232,14 @@ BASE_HTML = """<!DOCTYPE html>
   .typing::after { content:'|'; animation:blink 1s step-end infinite; }
   @keyframes blink { 50% { opacity:0; } }
 
-  /* Dropdown, Modal, Toast */
-  .menu { position:absolute; right:0; top:calc(100% + .5rem); min-width:15rem; opacity:0; transform:translateY(-6px) scale(.98); pointer-events:none; transition:opacity .2s, transform .2s; z-index:60; }
+  /* Menu Dropdown */
+  .menu { position:absolute; right:0; top:calc(100% + .5rem); min-width:16rem; opacity:0; transform:translateY(-6px) scale(.98); pointer-events:none; transition:opacity .2s, transform .2s; z-index:60; }
   .menu.open { opacity:1; transform:none; pointer-events:auto; }
   .switch { width:2.6rem; height:1.5rem; border-radius:999px; background:var(--border); position:relative; transition:background .25s; flex-shrink:0; }
   .switch::after { content:''; position:absolute; top:.19rem; left:.19rem; width:1.12rem; height:1.12rem; border-radius:50%; background:#fff; transition:transform .25s; }
   .dark .switch { background:var(--accent); } .dark .switch::after { transform:translateX(1.1rem); }
+  
+  /* Modal / Toast */
   #modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.5); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; z-index:100; opacity:0; pointer-events:none; transition:opacity .2s; }
   #modal-bg.open { opacity:1; pointer-events:auto; }
   #modal-box { transform:scale(.94); transition:transform .25s; }
@@ -249,7 +248,6 @@ BASE_HTML = """<!DOCTYPE html>
   .toast { background:var(--text); color:var(--bg); padding:.75rem 1.1rem; border-radius:.8rem; font-weight:600; font-size:.875rem; box-shadow:var(--shadow); animation:pageIn .3s ease both; }
   .toast.out { opacity:0; transform:translateY(8px); transition:.3s; }
   ::-webkit-scrollbar { width:6px; height:6px; } ::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
-  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; } }
 </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -260,19 +258,23 @@ BASE_HTML = """<!DOCTYPE html>
       <div><div class="font-extrabold tracking-tight leading-tight">Iris Pro</div><div class="text-[11px] muted font-mono">SVM Classifier</div></div>
     </a>
     <nav id="nav" class="flex items-center gap-5 overflow-x-auto">
-      <a href="/" class="nav-link">Trang chủ</a>
-      <a href="/dataset" class="nav-link">Dữ liệu</a>
-      <a href="/lab" class="nav-link">Phân tích</a>
-      <a href="/vector3d" class="nav-link">Không gian 3D</a>
-      <a href="/kernels" class="nav-link">Kernels</a>
-      <a href="/game" class="nav-link">Giải trí</a>
+      <a href="/" class="nav-link" data-i18n="nav_home">Trang chủ</a>
+      <a href="/dataset" class="nav-link" data-i18n="nav_dataset">Dữ liệu</a>
+      <a href="/lab" class="nav-link" data-i18n="nav_lab">Phân tích</a>
+      <a href="/vector3d" class="nav-link" data-i18n="nav_3d">Không gian 3D</a>
+      <a href="/kernels" class="nav-link" data-i18n="nav_kernels">Kernels</a>
+      <a href="/game" class="nav-link" data-i18n="nav_game">Giải trí</a>
     </nav>
     <div class="relative shrink-0">
-      <button id="settings-btn" class="btn btn-ghost !py-2" aria-haspopup="true">⚙️ Cài đặt ▾</button>
+      <button id="settings-btn" class="btn btn-ghost !py-2" aria-haspopup="true" data-i18n="settings">⚙️ Cài đặt ▾</button>
       <div id="settings-menu" class="menu card p-2">
         <button onclick="toggleTheme()" class="w-full flex items-center justify-between gap-4 p-3 rounded-xl hover:bg-[var(--surface-2)] transition text-left">
-          <span class="text-sm font-semibold">Giao diện tối <span id="theme-label" class="block text-xs muted font-normal">Đang dùng chế độ sáng</span></span>
+          <span class="text-sm font-semibold"><span data-i18n="theme_dark">Giao diện tối</span> <span id="theme-label" class="block text-xs muted font-normal">Đang dùng chế độ sáng</span></span>
           <span class="switch"></span>
+        </button>
+        <button onclick="toggleLang()" class="w-full flex items-center justify-between gap-4 p-3 rounded-xl hover:bg-[var(--surface-2)] transition text-left mt-1 border-t" style="border-color:var(--border)">
+          <span class="text-sm font-semibold" data-i18n="lang_label">Ngôn ngữ (Language)</span>
+          <span id="lang-status" class="text-xs font-mono accent">Tiếng Việt</span>
         </button>
       </div>
     </div>
@@ -284,7 +286,7 @@ BASE_HTML = """<!DOCTYPE html>
 <footer class="border-t mt-auto" style="border-color:var(--border)">
   <div class="max-w-7xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-2 text-xs muted">
     <span>Fisher's Iris (1936) · Machine Learning</span>
-    <span>Tác giả: <b style="color:var(--text)">Nguyễn Minh Hoàng</b></span>
+    <span><span data-i18n="author">Tác giả:</span> <b style="color:var(--text)">Nguyễn Minh Hoàng</b></span>
   </div>
 </footer>
 
@@ -295,39 +297,81 @@ BASE_HTML = """<!DOCTYPE html>
 <div id="toasts"></div>
 
 <script>
+  // ---- Ngôn ngữ (i18n) ----
+  const i18nDict = {
+    vi: {
+        nav_home: "Trang chủ", nav_dataset: "Dữ liệu", nav_lab: "Phân tích",
+        nav_3d: "Không gian 3D", nav_kernels: "Kernels", nav_game: "Giải trí",
+        settings: "⚙️ Cài đặt ▾", theme_dark: "Giao diện tối", lang_label: "Ngôn ngữ",
+        lang_curr: "Tiếng Việt", author: "Tác giả:"
+    },
+    en: {
+        nav_home: "Home", nav_dataset: "Dataset", nav_lab: "Lab",
+        nav_3d: "3D Space", nav_kernels: "Kernels", nav_game: "Game",
+        settings: "⚙️ Settings ▾", theme_dark: "Dark mode", lang_label: "Language",
+        lang_curr: "English", author: "Author:"
+    }
+  };
+  let currentLang = localStorage.getItem('lang') || 'vi';
+
+  function applyLang() {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+          const key = el.getAttribute('data-i18n');
+          if (i18nDict[currentLang] && i18nDict[currentLang][key]) {
+              el.innerHTML = i18nDict[currentLang][key];
+          }
+      });
+      document.getElementById('lang-status').textContent = i18nDict[currentLang]['lang_curr'];
+      syncThemeUI(); // Cập nhật luôn chữ trạng thái theme
+  }
+
+  function toggleLang() {
+      currentLang = currentLang === 'vi' ? 'en' : 'vi';
+      localStorage.setItem('lang', currentLang);
+      applyLang();
+  }
+
   // ---- Theme ----
   function syncThemeUI() {
     const dark = document.documentElement.classList.contains('dark');
-    document.getElementById('theme-label').textContent = dark ? 'Đang dùng chế độ tối' : 'Đang dùng chế độ sáng';
-    if (window.Chart) { Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim();
-      Chart.defaults.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
-      Object.values(Chart.instances).forEach(c => c.update()); }
+    const txtVi = dark ? 'Đang dùng chế độ tối' : 'Đang dùng chế độ sáng';
+    const txtEn = dark ? 'Using dark mode' : 'Using light mode';
+    document.getElementById('theme-label').textContent = currentLang === 'en' ? txtEn : txtVi;
+    
+    if (window.Chart) { 
+        Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim();
+        Chart.defaults.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+        Object.values(Chart.instances).forEach(c => c.update()); 
+    }
     if (typeof onThemeChange === 'function') onThemeChange(dark);
   }
+
   function toggleTheme() {
     const dark = !document.documentElement.classList.contains('dark');
     document.documentElement.classList.toggle('dark', dark);
     localStorage.setItem('theme', dark ? 'dark' : 'light');
     syncThemeUI();
   }
-  // ---- Dropdown Cài đặt ----
+
+  // ---- Tương tác UI Khác ----
   const menu = document.getElementById('settings-menu');
   document.getElementById('settings-btn').addEventListener('click', e => { e.stopPropagation(); menu.classList.toggle('open'); });
   document.addEventListener('click', e => { if (!menu.contains(e.target)) menu.classList.remove('open'); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') menu.classList.remove('open'); });
-  // ---- Nav active + chuyển trang mượt ----
+  
+  // Xử lý chuyển trang mượt
   document.querySelectorAll('#nav a').forEach(a => {
     if (a.getAttribute('href') === location.pathname) a.classList.add('active');
     a.addEventListener('click', e => { if (a.getAttribute('href') === location.pathname) return;
       e.preventDefault(); document.body.classList.add('leaving'); setTimeout(() => location.href = a.getAttribute('href'), 180); });
   });
-  // ---- Toast ----
+
   function toast(msg) {
     const el = document.createElement('div'); el.className = 'toast'; el.textContent = msg;
     document.getElementById('toasts').appendChild(el);
     setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 300); }, 2400);
   }
-  // ---- Confirm modal (trả về Promise<boolean>) ----
+
   function confirmModal(title, msg) {
     return new Promise(resolve => {
       const bg = document.getElementById('modal-bg');
@@ -339,7 +383,10 @@ BASE_HTML = """<!DOCTYPE html>
       bg.onclick = e => { if (e.target === bg) done(false); };
     });
   }
-  window.addEventListener('DOMContentLoaded', syncThemeUI);
+  
+  window.addEventListener('DOMContentLoaded', () => {
+      applyLang();
+  });
 </script>
 </body>
 </html>"""
@@ -428,7 +475,7 @@ def dataset_page():
         try {
           D = await (await fetch('/api/dataset')).json();
           document.getElementById('stat-head').innerHTML += D.features.map(f=>`<th class="py-2 px-3">${f}</th>`).join('');
-          document.getElementById('stat-body').innerHTML = D.species.map((s,i)=>`<tr class="border-t" style="border-color:var(--border)"><td class="py-3 pr-4 font-bold">${s.name}</td>${s.mean.map((m,j)=>`<td class="py-3 px-3">${s.min[j]} – <b>${m}</b> – ${s.max[j]}</td>`).join('')}</tr>`).join('');
+          document.getElementById('stat-body').innerHTML = D.species.map((s,i)=>`<tr class="border-t" style="border-color:var(--border)"><td class="py-3 pr-4 font-bold">${s.name}</td>${s.mean.map((m,j)=>`<td class="py-3 px-3">${s.min[j]} – <b>${m}</b> –${s.max[j]}</td>`).join('')}</tr>`).join('');
           paint();
         } catch (e) { toast('Không tải được dữ liệu. Hãy cài scikit-learn.'); }
       });
@@ -557,7 +604,7 @@ def lab_page():
           fetchHistory();
         } catch (e) { toast('Dự đoán thất bại. Kiểm tra file svm_model.pkl.'); }
         skel.classList.add('hidden'); view.classList.remove('opacity-0');
-        btn.disabled = false; btn.textContent = 'Phân tích ngay';
+        btn.disabled = false; btn.textContent = currentLang==='en'?'Analyze now':'Phân tích ngay';
       }
 
       async function compareKernels() {
@@ -572,7 +619,7 @@ def lab_page():
           const rows = await res.json();
           grid.innerHTML = rows.map((r, i) => `<div class="soft p-4 pop" style="animation-delay:${i*70}ms"><div class="text-xs muted mb-1">Kernel ${KNAME[r.kernel]}</div><div class="font-bold" style="color:${r.color}">${r.prediction}</div><div class="font-mono text-2xl font-black mt-1">${r.confidence}%</div><div class="text-xs muted mt-1">Chính xác chung: ${r.accuracy}%</div></div>`).join('');
         } catch (e) { panel.classList.add('hidden'); toast('Không so sánh được. Hãy cài scikit-learn.'); }
-        cb.disabled = false; cb.textContent = 'So sánh 4 nhân (Kernels) của mô hình';
+        cb.disabled = false; cb.textContent = currentLang==='en'?'Compare 4 Kernels':'So sánh 4 nhân (Kernels) của mô hình';
       }
       function onThemeChange() { if (scatterChart) { scatterChart.data.datasets[3].backgroundColor = cssv('--text'); scatterChart.update(); } }
       window.addEventListener('DOMContentLoaded', () => {
