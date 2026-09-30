@@ -6,3 +6,4 @@ numpy
 pydantic
 bcrypt
 PyJWT
+tsParticles
