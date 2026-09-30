@@ -9,6 +9,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
+import joblib
 
 # ==========================================
 # 1. CẤU HÌNH BẢO MẬT & JWT
@@ -67,7 +68,7 @@ init_db()
 MODEL_PATH = "svm_model.pkl"
 model = joblib.load(MODEL_PATH) if os.path.exists(MODEL_PATH) else None
 
-# Dữ liệu Iris thật & Kernel (Giữ nguyên như cũ)
+# Dữ liệu Iris thật & Kernel 
 KERNEL_NAMES = ["linear", "rbf", "poly", "sigmoid"]
 KERNEL_MODELS, KERNEL_SCORES, PCA_POINTS, DATASET_STATS = {}, {}, None, None
 try:
@@ -76,16 +77,19 @@ try:
     from sklearn.svm import SVC
     from sklearn.model_selection import cross_val_score
     from sklearn.decomposition import PCA
-    _iris = load_iris(); _X, _y = _iris.data, _iris.target
+    _iris = load_iris()
+    _X, _y = _iris.data, _iris.target
     for _k in KERNEL_NAMES:
         KERNEL_MODELS[_k] = SVC(kernel=_k, probability=True, random_state=42).fit(_X, _y)
         KERNEL_SCORES[_k] = round(float(cross_val_score(SVC(kernel=_k), _X, _y, cv=5).mean()) * 100, 1)
-    _p = PCA(n_components=3).fit(_X); _c = _p.transform(_X)
+    _p = PCA(n_components=3).fit(_X)
+    _c = _p.transform(_X)
     PCA_POINTS = {"points": [{"x": float(a), "y": float(b), "z": float(c), "cls": int(t)} for (a, b, c), t in zip(_c, _y)],
                   "variance": [round(float(v) * 100, 1) for v in _p.explained_variance_ratio_]}
     DATASET_STATS = {"features": ["Sepal L", "Sepal W", "Petal L", "Petal W"],
                      "species": [{"name": n, "count": int((_y == i).sum()), "mean": [round(float(v), 2) for v in _X[_y == i].mean(axis=0)], "min": [round(float(v), 1) for v in _X[_y == i].min(axis=0)], "max": [round(float(v), 1) for v in _X[_y == i].max(axis=0)]} for i, n in enumerate(["Setosa", "Versicolor", "Virginica"])]}
-except ImportError: pass
+except ImportError: 
+    pass
 
 app = FastAPI(title="Iris AI Classifier Pro", version="9.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
@@ -105,7 +109,10 @@ class ForgotPassAuth(BaseModel):
     new_password: str = Field(..., min_length=6)
 
 class IrisInput(BaseModel):
-    sepal_length: float; sepal_width: float; petal_length: float; petal_width: float
+    sepal_length: float
+    sepal_width: float
+    petal_length: float
+    petal_width: float
 
 SPECIES_METADATA = {0: {"name": "Iris Setosa", "color": "#ea580c"}, 1: {"name": "Iris Versicolor", "color": "#7c3aed"}, 2: {"name": "Iris Virginica", "color": "#0d9488"}}
 CENTROIDS = [[5.006, 3.428, 1.462, 0.246], [5.936, 2.770, 4.260, 1.326], [6.588, 2.974, 5.552, 2.026]]
@@ -189,7 +196,8 @@ def predict(data: IrisInput, username: str = Depends(get_current_user)):
     conn = sqlite3.connect(DB_PATH)
     conn.execute("INSERT INTO history (username, timestamp, sl, sw, pl, pw, species, confidence) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                  (username, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), *feat, meta["name"], conf[pred]))
-    conn.commit(); conn.close()
+    conn.commit()
+    conn.close()
     return {"prediction": meta["name"], "confidences": conf, "features": feat, "color": meta["color"]}
 
 @app.get("/api/history")
@@ -203,7 +211,8 @@ def get_history(username: str = Depends(get_current_user)):
 def clear_history(username: str = Depends(get_current_user)):
     conn = sqlite3.connect(DB_PATH)
     conn.execute("DELETE FROM history WHERE username=?", (username,))
-    conn.commit(); conn.close()
+    conn.commit()
+    conn.close()
     return {"status": "success"}
 
 @app.post("/api/compare_kernels")
@@ -216,9 +225,17 @@ def compare_kernels(data: IrisInput, username: str = Depends(get_current_user)):
         out.append({"kernel": k, "prediction": SPECIES_METADATA[idx]["name"], "color": SPECIES_METADATA[idx]["color"], "confidence": round(float(probs[idx]) * 100, 1), "accuracy": KERNEL_SCORES[k]})
     return out
 
-@app.get("/api/dataset"); def dataset_stats(): return DATASET_STATS
-@app.get("/api/pca"); def pca_points(): return PCA_POINTS
-@app.get("/api/kernel_scores"); def kernel_scores(): return KERNEL_SCORES
+@app.get("/api/dataset")
+def dataset_stats(): 
+    return DATASET_STATS
+
+@app.get("/api/pca")
+def pca_points(): 
+    return PCA_POINTS
+
+@app.get("/api/kernel_scores")
+def kernel_scores(): 
+    return KERNEL_SCORES
 
 # ==========================================
 # 6. GIAO DIỆN AUTH (TRANG ĐĂNG NHẬP)
@@ -479,13 +496,15 @@ BASE_HTML = """<!DOCTYPE html>
 </body>
 </html>"""
 
-def get_base_html(title, content): return BASE_HTML.replace("__TITLE__", title).replace("__CONTENT__", content)
+def get_base_html(title, content): 
+    return BASE_HTML.replace("__TITLE__", title).replace("__CONTENT__", content)
 
 # ==========================================
 # 8. CÁC TRANG RENDER (ROUTER)
 # ==========================================
 @app.get("/login", response_class=HTMLResponse)
-def login_page(): return AUTH_HTML
+def login_page(): 
+    return AUTH_HTML
 
 @app.get("/", response_class=HTMLResponse)
 def hero_page():
@@ -588,7 +607,9 @@ def lab_page():
     return get_base_html("Phân tích", content)
 
 @app.get("/vector3d", response_class=HTMLResponse)
-def vector3d_page(): return get_base_html("Không gian 3D", "<div class='p-8 flex justify-center h-[500px]'><div id='plot3d' class='w-full'></div></div><script>window.addEventListener('DOMContentLoaded', async () => { try { const PTS = await (await authFetch('/api/pca')).json(); const c = [getComputedStyle(document.body).getPropertyValue('--c-setosa'), getComputedStyle(document.body).getPropertyValue('--c-versicolor'), getComputedStyle(document.body).getPropertyValue('--c-virginica')]; const traces = [0,1,2].map(i => { const p = PTS.points.filter(q => q.cls === i); return { type:'scatter3d', mode:'markers', name:['Setosa','Versicolor','Virginica'][i], x:p.map(q=>q.x), y:p.map(q=>q.y), z:p.map(q=>q.z), marker:{ size:5, color:c[i] } }; }); Plotly.newPlot('plot3d', traces, {margin:{t:0,b:0,l:0,r:0}, paper_bgcolor:'rgba(0,0,0,0)'}); } catch (e) {} });</script>")
+def vector3d_page(): 
+    return get_base_html("Không gian 3D", "<div class='p-8 flex justify-center h-[500px]'><div id='plot3d' class='w-full'></div></div><script>window.addEventListener('DOMContentLoaded', async () => { try { const PTS = await (await authFetch('/api/pca')).json(); const c = [getComputedStyle(document.body).getPropertyValue('--c-setosa'), getComputedStyle(document.body).getPropertyValue('--c-versicolor'), getComputedStyle(document.body).getPropertyValue('--c-virginica')]; const traces = [0,1,2].map(i => { const p = PTS.points.filter(q => q.cls === i); return { type:'scatter3d', mode:'markers', name:['Setosa','Versicolor','Virginica'][i], x:p.map(q=>q.x), y:p.map(q=>q.y), z:p.map(q=>q.z), marker:{ size:5, color:c[i] } }; }); Plotly.newPlot('plot3d', traces, {margin:{t:0,b:0,l:0,r:0}, paper_bgcolor:'rgba(0,0,0,0)'}); } catch (e) {} });</script>")
 
 @app.get("/kernels", response_class=HTMLResponse)
-def kernels_page(): return get_base_html("Kernels", "<div class='p-8'><h2 class='text-2xl font-bold mb-4'>Độ chính xác Kernel</h2><div class='h-64 card p-4'><canvas id='accChart'></canvas></div></div><script>window.addEventListener('DOMContentLoaded', async () => { const scores = await (await authFetch('/api/kernel_scores')).json(); new Chart(document.getElementById('accChart'), { type:'bar', data:{ labels:['Linear','RBF','Poly','Sigmoid'], datasets:[{ data:['linear','rbf','poly','sigmoid'].map(k=>scores[k]), backgroundColor:'#ea580c' }] }, options:{ maintainAspectRatio:false } }); });</script>")
+def kernels_page(): 
+    return get_base_html("Kernels", "<div class='p-8'><h2 class='text-2xl font-bold mb-4'>Độ chính xác Kernel</h2><div class='h-64 card p-4'><canvas id='accChart'></canvas></div></div><script>window.addEventListener('DOMContentLoaded', async () => { const scores = await (await authFetch('/api/kernel_scores')).json(); new Chart(document.getElementById('accChart'), { type:'bar', data:{ labels:['Linear','RBF','Poly','Sigmoid'], datasets:[{ data:['linear','rbf','poly','sigmoid'].map(k=>scores[k]), backgroundColor:'#ea580c' }] }, options:{ maintainAspectRatio:false } }); });</script>")
