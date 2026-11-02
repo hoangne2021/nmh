@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ title }} | Botanical Lab Pro</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<script src="/static/js/bootstrap.js"></script>
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/particles.css">
+</head>
+<body class="min-h-screen flex flex-col relative">
+
+<ul class="bg-bubbles">
+    <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+</ul>
+
+<header class="sticky top-0 z-50 border-b backdrop-blur-md" style="background:color-mix(in srgb,var(--bg) 80%,transparent);border-color:var(--border)">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+    <a href="/" class="flex items-center gap-3 shrink-0">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl text-white" style="background:var(--accent)">🌿</div>
+      <div><div class="font-extrabold tracking-tight leading-tight">Iris Pro</div><div class="text-[11px] muted font-mono">SVM Classifier</div></div>
+    </a>
+    <nav id="nav" class="hidden md:flex items-center gap-5 overflow-x-auto">
+      <a href="/" class="nav-link">Trang chủ</a>
+      <a href="/dataset" class="nav-link">Dữ liệu</a>
+      <a href="/lab" class="nav-link">Phân tích</a>
+      <a href="/vector3d" class="nav-link">Không gian 3D</a>
+      <a href="/kernels" class="nav-link">Kernels</a>
+    </nav>
+    
+    <div class="relative shrink-0 flex items-center gap-2">
+      <button id="theme-toggle" class="w-9 h-9 rounded-full soft hover:bg-[var(--border)] transition flex items-center justify-center">🌓</button>
+      <button id="user-btn" class="btn btn-ghost !py-2 !px-3 !rounded-full">
+         <div class="w-6 h-6 rounded-full bg-orange-600 text-white text-xs flex items-center justify-center" id="avatar-initial">U</div>
+         <span id="display-username" class="font-bold">User</span> ▾
+      </button>
+      <div id="user-menu" class="menu card p-2 mt-2">
+        <div class="px-3 py-2 border-b mb-1" style="border-color:var(--border)">
+            <p class="text-xs muted">Đăng nhập dưới tên</p>
+            <p class="font-bold truncate" id="menu-username"></p>
+        </div>
+        <button id="go-recovery" class="w-full text-left p-2 text-sm font-semibold hover:bg-[var(--surface-2)] rounded-lg transition">🔐 Khôi phục mật khẩu</button>
+        <button id="logout-button" class="w-full text-left p-2 text-sm font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition mt-1">🚪 Đăng xuất</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="w-full flex-grow flex flex-col relative z-10">{% block content %}{% endblock %}</main>
+
+<div id="modal-bg" class="z-50"><div id="modal-box" class="card p-6 max-w-sm w-[90%]"><h3 id="modal-title" class="font-bold text-lg mb-2"></h3><p id="modal-msg" class="text-sm muted mb-6"></p><div class="flex gap-3 justify-end"><button id="modal-no" class="btn btn-ghost">Hủy</button><button id="modal-yes" class="btn btn-danger">Xác nhận</button></div></div></div>
+<div id="toasts"></div>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="/static/js/common.js"></script>
+{% block page_script %}{% endblock %}
+</body>
+</html>

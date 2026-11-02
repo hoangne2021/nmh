@@ -1,0 +1,11 @@
+body { font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+    .form-wrapper { display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr; align-items: start; }
+    .form-wrapper > form { grid-area: 1 / 1; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    
+    .card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid #e5e7eb; box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1); }
+    .dark .card { background: rgba(26, 23, 21, 0.85); border-color: #2e2925; box-shadow: 0 20px 40px -10px rgba(0,0,0, 0.5); }
+    .input-field { width: 100%; padding: 0.75rem 1rem; border-radius: 0.75rem; border: 1px solid #d1d5db; outline: none; transition: all 0.2s; background: transparent; }
+    .dark .input-field { border-color: #3f3f46; color: white; }
+    .input-field:focus { border-color: #ea580c; box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15); }
+    .btn-primary { background: #ea580c; color: white; padding: 0.75rem; border-radius: 0.75rem; font-weight: 700; width: 100%; transition: all 0.3s; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(234, 88, 12, 0.4); }

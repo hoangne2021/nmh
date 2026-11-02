@@ -1,0 +1,24 @@
+# Tạo blueprint tại Dashboard Render -> New -> Blueprint
+services:
+  - type: web
+    name: botanical-iris-svm
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.9
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: botanical-iris-postgres
+          property: connectionString
+
+databases:
+  - name: botanical-iris-postgres
+    plan: free
+    databaseName: botanical_iris
+    user: botanical_iris

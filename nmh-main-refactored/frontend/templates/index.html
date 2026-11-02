@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="border-b" style="border-color:var(--border)">
+      <div class="max-w-7xl mx-auto px-6 py-16 lg:py-28 grid lg:grid-cols-2 gap-12 items-center">
+        <div data-aos="fade-right">
+          <span class="px-3 py-1 text-xs font-bold rounded-full inline-block mb-2" style="background:var(--accent-soft);color:var(--accent)">Khoa học dữ liệu</span>
+          <h2 class="text-4xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight">Nhận dạng hoa Diên Vĩ bằng SVM</h2>
+          <p class="mt-6 text-lg muted leading-relaxed max-w-lg">Nhập bốn số đo của một bông hoa, mô hình sẽ cho biết đó là loài nào. Tài khoản được bảo vệ bằng mật khẩu băm và phiên đăng nhập JWT.</p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href="/lab" class="btn btn-primary group">
+              Khởi động Lab <span class="inline-block transition-transform duration-300 group-hover:translate-x-1">➔</span>
+            </a>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-4" data-aos="fade-left" data-aos-delay="200">
+          <div class="card card-hover p-5 text-center"><div class="text-4xl mb-3 transition-transform duration-300 hover:scale-110 cursor-default">🌸</div><div class="font-bold sw-c">Setosa</div></div>
+          <div class="card card-hover p-5 text-center" style="animation-delay: 100ms"><div class="text-4xl mb-3 transition-transform duration-300 hover:scale-110 cursor-default">🌺</div><div class="font-bold ve-c">Versicolor</div></div>
+          <div class="card card-hover p-5 text-center" style="animation-delay: 200ms"><div class="text-4xl mb-3 transition-transform duration-300 hover:scale-110 cursor-default">🌷</div><div class="font-bold vi-c">Virginica</div></div>
+        </div>
+      </div>
+    </section>
+{% endblock %}

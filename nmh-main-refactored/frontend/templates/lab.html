@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 w-full">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mb-6">
+        <div class="lg:col-span-4 card p-6" data-aos="fade-right">
+          <div class="flex justify-between items-center mb-6"><h2 class="font-bold text-lg">Tham số</h2><button id="randomize-button" class="text-xl hover:rotate-180 transition duration-300">🎲</button></div>
+          <div class="space-y-6">
+            <div><div class="flex justify-between text-xs font-bold mb-2"><span>Sepal L</span><span id="txt-sl" class="accent">5.1</span></div><input type="range" id="sl" min="4.0" max="8.0" step="0.1" value="5.1" class="w-full" ></div>
+            <div><div class="flex justify-between text-xs font-bold mb-2"><span>Sepal W</span><span id="txt-sw" class="accent">3.5</span></div><input type="range" id="sw" min="2.0" max="4.5" step="0.1" value="3.5" class="w-full" ></div>
+            <div><div class="flex justify-between text-xs font-bold mb-2"><span>Petal L</span><span id="txt-pl" class="accent">1.4</span></div><input type="range" id="pl" min="1.0" max="7.0" step="0.1" value="1.4" class="w-full" ></div>
+            <div><div class="flex justify-between text-xs font-bold mb-2"><span>Petal W</span><span id="txt-pw" class="accent">0.2</span></div><input type="range" id="pw" min="0.1" max="2.6" step="0.1" value="0.2" class="w-full" ></div>
+          </div>
+          <button id="btn-predict" class="btn btn-dark w-full mt-8 group">
+            Phân tích ngay <span class="inline-block transition-transform duration-300 group-hover:translate-x-1">➔</span>
+          </button>
+          <button id="btn-compare" disabled class="btn btn-primary w-full mt-3 hidden group">
+            So sánh Kernels <span class="inline-block transition-transform duration-300 group-hover:translate-x-1">➔</span>
+          </button>
+        </div>
+        <div class="lg:col-span-8 flex flex-col gap-6" data-aos="fade-left" data-aos-delay="200">
+          <div class="card p-6 sm:p-8 relative overflow-hidden min-h-[140px] flex items-center">
+            <div id="result-view" class="flex items-center justify-between w-full transition-opacity duration-300">
+              <div><p class="text-xs font-bold muted">Kết quả dự đoán</p><h3 id="specimen-title" class="text-3xl font-black mt-1">Chưa có kết quả</h3></div>
+              <div class="text-right"><p class="text-xs font-bold muted">Điểm tương đồng (ước tính)</p><div class="text-4xl font-black font-mono accent" id="main-conf">–</div></div>
+            </div>
+          </div>
+          <div id="compare-panel" class="hidden card p-6"><div id="compare-grid" class="grid sm:grid-cols-2 gap-4"></div></div>
+          <div class="card p-6 h-72 flex flex-col card-hover"><div class="flex-grow w-full relative"><canvas id="scatterChart"></canvas></div></div>
+        </div>
+      </div>
+      <div class="card p-6 card-hover" data-aos="fade-up">
+        <div class="flex flex-wrap justify-between items-center gap-3 mb-4"><h2 class="font-bold text-lg">Lịch sử cá nhân</h2><button id="clear-history-button" class="btn btn-danger !py-2">🗑 Xóa</button></div>
+        <div class="overflow-x-auto"><table class="w-full text-left text-sm whitespace-nowrap">
+          <thead><tr class="muted text-xs border-b" style="border-color:var(--border)"><th class="py-3 px-4">Thời gian</th><th class="py-3 px-4">P.L</th><th class="py-3 px-4">P.W</th><th class="py-3 px-4">Dự đoán</th></tr></thead>
+          <tbody id="history-tbody"></tbody></table></div>
+      </div>
+    </div>
+{% endblock %}
+{% block page_script %}
+<script src="/static/js/lab.js"></script>
+{% endblock %}

@@ -1,0 +1,24 @@
+:root { --bg:#f7f5f2; --surface:rgba(255,255,255,0.85); --surface-2:#f1eee9; --text:#1c1917; --muted:#6b645c; --border:#e4dfd8; --accent:#ea580c; --accent-soft:rgba(234,88,12,.10); --c-setosa:#ea580c; --c-versicolor:#7c3aed; --c-virginica:#0d9488; --shadow:0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+  .dark { --bg:#0f0d0c; --surface:rgba(26,23,21,0.85); --surface-2:#231f1c; --text:#f5f2ee; --muted:#a39b91; --border:#2e2925; --accent:#fb923c; --accent-soft:rgba(251,146,60,.14); --c-setosa:#fb923c; --c-versicolor:#a78bfa; --c-virginica:#2dd4bf; --shadow:0 10px 15px -3px rgba(0, 0, 0, 0.3); }
+  html { scroll-behavior:smooth; } body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',sans-serif; transition:background .3s,color .3s; overflow-x:hidden; }
+  
+  .card { background:var(--surface); backdrop-filter:blur(12px); border:1px solid var(--border); box-shadow:var(--shadow); border-radius:1.25rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 10; position:relative; } 
+  .card-hover:hover { transform:translateY(-6px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 0 15px var(--accent-soft); border-color: var(--accent); }
+  .dark .card-hover:hover { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 0 20px rgba(234, 88, 12, 0.25); }
+  
+  .soft { background:var(--surface-2); border:1px solid var(--border); border-radius:1rem; } .accent { color:var(--accent); }
+  
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; padding:.75rem 1.25rem; border-radius:.85rem; font-weight:700; font-size:.9rem; transition:all 0.3s; cursor:pointer; }
+  .btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow: 0 10px 15px -3px var(--accent-soft); } .btn:active:not(:disabled) { transform:translateY(0) scale(.98); } .btn:disabled { opacity:.45; cursor:not-allowed; }
+  .btn-primary { background:var(--accent); color:#fff; box-shadow:0 8px 20px -8px var(--accent); } .btn-dark { background:var(--text); color:var(--bg); } .btn-ghost { background:var(--surface-2); border:1px solid var(--border); color:var(--text); } .btn-danger { background:rgba(220,38,38,.1); color:#dc2626; border:1px solid rgba(220,38,38,.25); }
+  
+  input[type=range] { accent-color:var(--accent); }
+  .nav-link { position:relative; padding:.4rem .1rem; font-weight:600; font-size:.9rem; color:var(--muted); transition:color .2s; white-space:nowrap; } .nav-link:hover, .nav-link.active { color:var(--text); } .nav-link::after { content:''; position:absolute; left:0; bottom:-2px; height:2px; width:100%; background:var(--accent); transform:scaleX(0); transform-origin:left; transition:transform .3s; } .nav-link.active::after, .nav-link:hover::after { transform:scaleX(1); }
+  .sw-c { color:var(--c-setosa); } .ve-c { color:var(--c-versicolor); } .vi-c { color:var(--c-virginica); }
+  
+  @keyframes pop { from { opacity:0; transform:scale(.94); } to { opacity:1; transform:none; } } .pop { animation:pop .35s ease both; }
+  
+  .menu { position:absolute; right:0; top:calc(100% + .5rem); min-width:14rem; opacity:0; transform:translateY(-6px) scale(.98); pointer-events:none; transition:all 0.2s; z-index:60; } .menu.open { opacity:1; transform:none; pointer-events:auto; }
+  #modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.5); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; z-index:100; opacity:0; pointer-events:none; transition:opacity .2s; } #modal-bg.open { opacity:1; pointer-events:auto; } #modal-box { transform:scale(.94); transition:transform .25s; } #modal-bg.open #modal-box { transform:none; }
+  #toasts { position:fixed; bottom:1.25rem; right:1.25rem; z-index:120; display:flex; flex-direction:column; gap:.5rem; } .toast { background:var(--text); color:var(--bg); padding:.75rem 1.1rem; border-radius:.8rem; font-weight:600; font-size:.875rem; box-shadow:var(--shadow); animation:pop .3s ease both; } .toast.out { opacity:0; transform:translateY(8px); transition:.3s; }
+  ::-webkit-scrollbar { width:6px; height:6px; } ::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }

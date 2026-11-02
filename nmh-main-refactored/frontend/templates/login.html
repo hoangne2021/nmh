@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đăng nhập | Botanical Lab Pro</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="/static/js/login_bootstrap.js"></script>
+<link rel="stylesheet" href="/static/css/login.css">
+<link rel="stylesheet" href="/static/css/particles.css">
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0f0d0c] text-gray-900 dark:text-gray-100 p-4 relative">
+    
+    <ul class="bg-bubbles">
+    <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+</ul>
+
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-sm font-bold text-white opacity-0 transition-all duration-300 pointer-events-none z-50 transform translate-y-[-20px]"></div>
+
+    <div class="card p-8 rounded-3xl w-full max-w-md relative z-10 overflow-hidden" data-aos="zoom-in" data-aos-duration="800">
+        <div class="text-center mb-8">
+            <div class="w-14 h-14 rounded-2xl bg-orange-600 flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg shadow-orange-600/30">🌿</div>
+            <h2 class="text-2xl font-extrabold tracking-tight">Botanical Lab Pro</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Đăng nhập để sử dụng AI phân tích</p>
+        </div>
+
+        <div class="form-wrapper">
+            <!-- Form Login -->
+            <form id="form-login" class="space-y-4 opacity-100 transform translate-x-0 pointer-events-auto">
+                <div><label class="text-sm font-bold mb-1 block">Tên đăng nhập</label><input type="text" id="l-user" class="input-field" autocomplete="username" required></div>
+                <div><label class="text-sm font-bold mb-1 block">Mật khẩu</label><input type="password" id="l-pass" class="input-field" autocomplete="current-password" required></div>
+                <div class="flex justify-between items-center text-sm">
+                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="remember-me" checked class="accent-orange-600"> <span>Nhớ tài khoản</span></label>
+                    <button type="button" data-auth-tab="forgot" class="text-orange-600 hover:underline font-semibold">Quên mật khẩu?</button>
+                </div>
+                <button type="submit" class="btn-primary mt-4 group">
+                    Đăng nhập ngay <span class="inline-block transition-transform duration-300 group-hover:translate-x-1">➔</span>
+                </button>
+                <p class="text-center text-sm mt-4 text-gray-500">Chưa có tài khoản? <button type="button" data-auth-tab="register" class="text-orange-600 font-bold hover:underline">Tạo tài khoản</button></p>
+            </form>
+
+            <!-- Form Register -->
+            <form id="form-register" class="space-y-4 opacity-0 transform translate-x-10 pointer-events-none">
+                <div><label class="text-sm font-bold mb-1 block">Tên đăng nhập mới</label><input type="text" id="r-user" class="input-field" minlength="3" maxlength="20" autocomplete="username" required></div>
+                <div><label class="text-sm font-bold mb-1 block">Mật khẩu (tối thiểu 8 ký tự)</label><input type="password" id="r-pass" class="input-field" minlength="8" autocomplete="new-password" required></div>
+                <button type="submit" class="btn-primary mt-4 group">
+                    Đăng ký tài khoản <span class="inline-block transition-transform duration-300 group-hover:translate-x-1">➔</span>
+                </button>
+                <p class="text-center text-sm mt-4 text-gray-500">Đã có tài khoản? <button type="button" data-auth-tab="login" class="text-orange-600 font-bold hover:underline">Đăng nhập</button></p>
+            </form>
+
+            <!-- Khôi phục mật khẩu bằng mã do server sinh ra khi đăng ký. -->
+            <form id="form-forgot" class="space-y-4 opacity-0 transform -translate-x-10 pointer-events-none">
+                <p class="text-sm text-gray-600 dark:text-gray-300">Nhập <strong>mã khôi phục</strong> bạn đã lưu khi đăng ký. Không ai có thể đặt lại mật khẩu chỉ bằng phép tính trên trình duyệt.</p>
+                <div><label class="text-sm font-bold mb-1 block">Tên đăng nhập</label><input type="text" id="f-user" class="input-field" autocomplete="username" required></div>
+                <div><label class="text-sm font-bold mb-1 block">Mã khôi phục</label><input type="text" id="f-recovery" class="input-field font-mono" placeholder="Dán mã đã lưu khi đăng ký" autocomplete="off" required></div>
+                <div><label class="text-sm font-bold mb-1 block">Mật khẩu mới (ít nhất 8 ký tự)</label><input type="password" id="f-pass" class="input-field" minlength="8" autocomplete="new-password" required></div>
+                <button type="submit" class="btn-primary mt-4 bg-gray-900 dark:bg-gray-100 dark:text-gray-900 group">Đặt lại mật khẩu ➔</button>
+                <button type="button" data-auth-tab="login" class="w-full text-center text-sm mt-4 text-gray-500 hover:text-gray-900 dark:hover:text-white font-semibold">⬅ Quay lại Đăng nhập</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="recovery-modal" class="fixed inset-0 z-[200] hidden bg-black/70 p-4 items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="recovery-title">
+        <div class="card p-6 rounded-3xl max-w-lg w-full relative z-10">
+            <div class="text-3xl mb-3">🔐</div>
+            <h3 id="recovery-title" class="font-extrabold text-xl">Lưu mã khôi phục tài khoản</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-2">Hãy sao chép và cất mã ở nơi riêng tư. Hệ thống chỉ hiển thị mã <strong>một lần</strong>; không lưu mã rõ trong cơ sở dữ liệu.</p>
+            <div class="mt-4 p-3 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-x-auto"><code id="recovery-code" class="text-sm select-all break-all"></code></div>
+            <div class="grid grid-cols-2 gap-3 mt-5">
+                <button type="button" id="copy-recovery" class="btn-primary bg-gray-900 dark:bg-white dark:text-gray-900">Sao chép mã</button>
+                <button type="button" id="recovery-done" class="btn-primary">Đã lưu mã ✓</button>
+            </div>
+        </div>
+    </div>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="/static/js/login.js"></script>
+</body>
+</html>

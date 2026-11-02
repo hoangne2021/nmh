@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 w-full">
+      <h2 class="text-2xl font-bold mb-6" data-aos="fade-up">Thống kê dữ liệu</h2>
+      <div class="grid lg:grid-cols-3 gap-6 mb-6">
+        <div class="card p-6 card-hover" data-aos="fade-up" data-aos-delay="100"><div class="h-56"><canvas id="pie"></canvas></div></div>
+        <div class="card p-6 card-hover lg:col-span-2" data-aos="fade-up" data-aos-delay="200"><div class="h-56"><canvas id="bar"></canvas></div></div>
+      </div>
+    </div>
+{% endblock %}
+{% block page_script %}
+<script src="/static/js/dataset.js"></script>
+{% endblock %}
